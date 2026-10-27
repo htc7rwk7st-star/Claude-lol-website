@@ -5,3 +5,4 @@ matches_db.json
 results.json
 data/
 *.tmp
+dist/

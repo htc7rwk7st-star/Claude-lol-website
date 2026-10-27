@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: lol-duo-challenge
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: RIOT_API_KEY
+        sync: false
+      - key: CHALLENGE_START_TIMESTAMP
+        value: "1790805600"
+      - key: CHALLENGE_END_TIMESTAMP
+        value: "1796079599"
+      - key: REFRESH_ON_START
+        value: "true"

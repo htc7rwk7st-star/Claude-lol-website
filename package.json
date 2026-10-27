@@ -2,16 +2,29 @@
   "name": "lol-duo-challenge",
   "version": "1.0.0",
   "private": true,
-  "description": "Backend für das League of Legends Duo Challenge Dashboard",
+  "description": "League of Legends Duo Challenge: Dashboard (React) und Riot-API-Backend (Express)",
   "main": "server.js",
   "scripts": {
+    "dev": "concurrently -k -n api,web -c yellow,cyan \"node --watch server.js\" \"vite\"",
+    "build": "vite build",
     "start": "node server.js"
   },
   "engines": {
-    "node": ">=18.17"
+    "node": ">=20"
   },
   "dependencies": {
     "dotenv": "^17.2.3",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "lucide-react": "^0.263.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.5.2",
+    "autoprefixer": "^10.4.21",
+    "concurrently": "^9.2.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17",
+    "vite": "^6.3.5"
   }
 }

@@ -25,6 +25,7 @@ const DUOS = [
   {
     id: "baron-bandits",
     name: "Baron Bandits",
+    motto: "Wer zuerst smitet, zahlt nicht die Pizza.",
     players: [
       { gameName: "Kaiserschmarrn", tagLine: "EUW" },
       { gameName: "MidOrFeed", tagLine: "2407" },
@@ -33,6 +34,7 @@ const DUOS = [
   {
     id: "botlane-buendnis",
     name: "Botlane-Bündnis",
+    motto: "2v2 Bot oder gar nicht.",
     players: [
       { gameName: "Jinxed4Life", tagLine: "BOT" },
       { gameName: "ThreshHold", tagLine: "hook" },
@@ -41,6 +43,7 @@ const DUOS = [
   {
     id: "dorfjungen",
     name: "Die Dorfjungen",
+    motto: "Garen drückt E, wir drücken die Daumen.",
     players: [
       { gameName: "Grubenjunge", tagLine: "RUHR" },
       { gameName: "LilliaLiebhaber", tagLine: "EUW" },
@@ -49,6 +52,7 @@ const DUOS = [
   {
     id: "tilt-resistent",
     name: "Tilt-Resistent",
+    motto: "Mute all, Kopf hoch, weiter queuen.",
     players: [
       { gameName: "NoFlashNoProblem", tagLine: "EUW" },
       { gameName: "KarmaKoma", tagLine: "1234" },
@@ -84,6 +88,7 @@ const MATCH_DB_FLUSH_EVERY = 25;
 const PUUID_CACHE_FILE = path.join(DATA_DIR, "cache.json");
 const MATCH_DB_FILE = path.join(DATA_DIR, "matches_db.json");
 const RESULTS_FILE = path.join(DATA_DIR, "results.json");
+const DIST_DIR = path.join(__dirname, "dist");
 
 // Riot teamPosition -> Rollen-Schlüssel des Frontends
 const ROLE_MAP = {
@@ -619,6 +624,7 @@ async function evaluateDuo(duoConfig) {
   return {
     id: duoConfig.id,
     name: duoConfig.name,
+    motto: duoConfig.motto || null,
     players: players.map((p, index) => ({
       gameName: p.gameName,
       tagLine: p.tagLine,
@@ -713,8 +719,16 @@ async function runRefresh() {
       // Alte Daten behalten, damit ein einzelner Fehler das Dashboard nicht leert
       duos.push(
         previous
-          ? { ...previous, error: err.message }
-          : { id: duoConfig.id, name: duoConfig.name, players: [], stats: null, games: [], error: err.message }
+          ? { ...previous, motto: duoConfig.motto || null, error: err.message }
+          : {
+              id: duoConfig.id,
+              name: duoConfig.name,
+              motto: duoConfig.motto || null,
+              players: [],
+              stats: null,
+              games: [],
+              error: err.message,
+            }
       );
     }
   }
@@ -803,6 +817,16 @@ app.post("/api/refresh", (req, res) => {
   startRefresh();
   // Ein erster Refresh kann bei vielen Matches Minuten dauern, daher 202 + Polling über /api/duos
   res.status(202).json({ message: "Aktualisierung gestartet", meta: buildMeta() });
+});
+
+// Gebautes Frontend (npm run build) ausliefern, alle Nicht-API-Pfade landen in der React-App
+app.use(express.static(DIST_DIR, { index: false, maxAge: "7d", immutable: true }));
+
+app.use((req, res, next) => {
+  if (req.method !== "GET" || req.path.startsWith("/api/")) return next();
+  res.sendFile(path.join(DIST_DIR, "index.html"), { headers: { "Cache-Control": "no-cache" } }, (err) => {
+    if (err) next();
+  });
 });
 
 app.use((req, res) => {
