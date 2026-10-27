@@ -1,0 +1,7 @@
+node_modules/
+.env
+cache.json
+matches_db.json
+results.json
+data/
+*.tmp
